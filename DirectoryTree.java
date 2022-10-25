@@ -1,11 +1,9 @@
-import java.util.Scanner;
-
 public class DirectoryTree {
     private DirectoryNode root;
     private DirectoryNode cursor;
 
     public DirectoryTree(){
-        root = new DirectoryNode("root", false);
+        root = new DirectoryNode("root", false, null);
         cursor = root;
     }
 
@@ -17,13 +15,13 @@ public class DirectoryTree {
         cursor = root;
     }
 
+    public void setCursor(DirectoryNode node){
+        cursor = node;
+    }
+
     public void changeDirectory(String name) throws NotADirectoryException{
         if(!changeDirectoryHelper(name, root)){
-            System.out.print("The directory name entered couldn't be found. Please try again: ");
-            Scanner scan = new Scanner(System.in);
-
-            String newName = scan.nextLine();
-            changeDirectory(newName);
+            System.out.println("ERROR: No such directory named '" + name + "'." );
         }
     }
 
@@ -33,7 +31,7 @@ public class DirectoryTree {
         }
         if(root.getIsFile()){
             if(root.getName().equals(name)){
-                throw new NotADirectoryException("File name entered is not a directory. Please try again.");
+                throw new NotADirectoryException("ERROR: Cannot change directory into a file.");
             }
             else{
                 return false;
@@ -47,15 +45,15 @@ public class DirectoryTree {
         return changeDirectoryHelper(name, root.getLeft()) || changeDirectoryHelper(name, root.getMiddle()) || changeDirectoryHelper(name, root.getRight());
     }
 
-    public String presentWorkingdirectory(){
+    public String presentWorkingdirectory(String target){
         DirectoryNode pointer = root;
         String ans = pointer.getName();
 
-        while(pointer != cursor){
-            if(presentWorkingDirectoryHelper(pointer.getLeft())){
+        while(!pointer.getName().equals(target)){
+            if(presentWorkingDirectoryHelper(pointer.getLeft(), target)){
                 pointer = pointer.getLeft();
             }
-            else if(presentWorkingDirectoryHelper(pointer.getMiddle())){
+            else if(presentWorkingDirectoryHelper(pointer.getMiddle(), target)){
                 pointer = pointer.getMiddle();
             }
             else{
@@ -66,15 +64,15 @@ public class DirectoryTree {
         return ans;
     }
 
-    public boolean presentWorkingDirectoryHelper(DirectoryNode root){
+    public boolean presentWorkingDirectoryHelper(DirectoryNode root, String target){
         if(root == null){
             return false;
         }
-        if(root == cursor){
+        if(root.getName().equals(target)){
             return true;
         }
         
-        return presentWorkingDirectoryHelper(root.getLeft()) || presentWorkingDirectoryHelper(root.getMiddle()) || presentWorkingDirectoryHelper(root.getRight());
+        return presentWorkingDirectoryHelper(root.getLeft(), target) || presentWorkingDirectoryHelper(root.getMiddle(), target) || presentWorkingDirectoryHelper(root.getRight(), target);
 
     }
 
@@ -115,7 +113,7 @@ public class DirectoryTree {
         if(name.contains(" ") || name.contains("/")){
             throw new IllegalArgumentException("Directory name should not contain spaces or forward slashes.");
         }
-        DirectoryNode directory = new DirectoryNode(name, false);
+        DirectoryNode directory = new DirectoryNode(name, false, cursor);
         cursor.addChildNode(directory);
     }
 
@@ -124,7 +122,68 @@ public class DirectoryTree {
             throw new IllegalArgumentException("File name should not contain spaces or forward slashes.");
         }
 
-        DirectoryNode file = new DirectoryNode(name, true);
+        DirectoryNode file = new DirectoryNode(name, true, cursor);
         cursor.addChildNode(file);
+    }
+
+    public int findFile(String name){
+        return findFileHelper(root, "", name, 0);
+    }
+
+    public int findFileHelper(DirectoryNode root, String path, String target, int count){
+        if(root == null){
+            return 0;
+        }
+        if(root.getName().equals(target)){
+            System.out.println(path.substring(1) + "/" + target);
+            return 1;
+        }
+        if(!root.getIsFile()){
+            count += findFileHelper(root.getLeft(), path + "/" + root.getName(), target, count);
+            count += findFileHelper(root.getMiddle(), path + "/" + root.getName(), target, count);
+            count += findFileHelper(root.getRight(), path + "/" + root.getName(), target, count);
+        }
+        return count;
+    }
+
+    public void followPath(String[] path, int targetIndex){
+        if(targetIndex == path.length){
+            return ;
+        }
+
+        String target = path[targetIndex];
+
+
+        if(cursor.getLeft() != null && cursor.getLeft().getName().equals(target)){
+            cursor = cursor.getLeft();
+        }
+        else if(cursor.getMiddle() != null && cursor.getMiddle().getName().equals(target)){
+            cursor = cursor.getMiddle();
+        }
+        else if(cursor.getRight() != null && cursor.getRight().getName().equals(target)){
+            cursor = cursor.getRight();
+        }
+        else{
+            System.out.println("ERROR: Invalid file path.");
+            return;
+        }
+
+        followPath(path, targetIndex + 1);
+    }
+
+    public void srcToDest(DirectoryNode src, DirectoryNode dest) throws NotADirectoryException, FullDirectoryException{
+        DirectoryNode srcParent = src.getParent();
+        if(srcParent.getLeft() == src){
+            srcParent.setLeft(null);
+        }
+        else if(src.getMiddle() == src){
+            srcParent.setMiddle(null);
+        }
+        else{
+            srcParent.setRight(null);
+        }
+
+        src.setParent(dest);
+        dest.addChildNode(src);
     }
 }

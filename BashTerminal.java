@@ -15,7 +15,7 @@ public class BashTerminal {
 
         while(!command.equals("exit")){
             if(command.equals("pwd")){
-                System.out.println(tree.presentWorkingdirectory());
+                System.out.println(tree.presentWorkingdirectory(tree.getCursor().getName()));
             }
 
             else if(command.contains("mkdir")){
@@ -41,7 +41,7 @@ public class BashTerminal {
                 tree.resetCursor();
             }
 
-            else if(command.contains("cd ")){
+            else if(!command.contains("/") && command.contains("cd ") && !command.equals("cd ..")){
                 try{
                     tree.changeDirectory(command.split(" ")[1]);
                 }
@@ -71,11 +71,54 @@ public class BashTerminal {
                 System.out.println();
             }
 
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /**EXTRA CREDIT */
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            else if(command.contains("find ")){
+                int occurrence = tree.findFile(command.split(" ")[1]);
+                if(occurrence == 0){
+                    System.out.println("ERROR: No such file exists.");
+                }
+            }
+
+            else if(command.equals("cd ..")){
+                if(tree.getCursor().getParent() == null){
+                    System.out.println("ERROR: Already at root directory.");
+                }
+                else{
+                    tree.setCursor(tree.getCursor().getParent());
+                }
+            }
+
+            else if(command.contains("cd")){
+                tree.followPath(command.split(" ")[1].split("/"), 0);
+            }
+
+            else if(command.contains("mv")){
+                tree.followPath(command.split(" ")[1].split("/"), 1);
+                DirectoryNode source = tree.getCursor();
+                tree.resetCursor();
+                tree.followPath(command.split(" ")[2].split("/"), 1);
+                DirectoryNode dest = tree.getCursor();
+                try{
+                    tree.srcToDest(source, dest);
+                }
+                catch(NotADirectoryException e){
+                    System.out.println("Destination is not a directory.");
+                }
+                catch(FullDirectoryException e){
+                    System.out.println("Destination is full.");
+                }
+
+                tree.resetCursor();
+            }
+
             System.out.print(commandLine);
 
             command = scan.nextLine();
         }
         System.out.println("Program terminating normally");
+        scan.close();
 
     }
 }
