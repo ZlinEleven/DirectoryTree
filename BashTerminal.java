@@ -1,5 +1,12 @@
+/** Zhenbin Lin, 114866923, Recitation 04 */
+
 import java.util.Scanner;
 
+/**
+ * This class contains the main method which is a menu driven application
+ * This program prompts the user for simulation parameters to run the simulation on.
+ * The user can also input "exit" to terminate the program.
+ */
 public class BashTerminal {
     public static void main(String[] args){
         Scanner scan = new Scanner(System.in);
@@ -15,7 +22,7 @@ public class BashTerminal {
 
         while(!command.equals("exit")){
             if(command.equals("pwd")){
-                System.out.println(tree.presentWorkingdirectory(tree.getCursor().getName()));
+                System.out.println(tree.presentWorkingDirectory(tree.getCursor().getName()));
             }
 
             else if(command.contains("mkdir")){
