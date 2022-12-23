@@ -1,6 +1,3 @@
-/** Zhenbin Lin, 114866923, Recitation 04 */
-
-
 /**
  * This class represents a DirectoryNode object which is a node in a DirectoryTree object
  */

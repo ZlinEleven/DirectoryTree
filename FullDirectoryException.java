@@ -1,6 +1,3 @@
-/** Zhenbin Lin, 114866923, Recitation 04 */
-
-
 /**
  * This is a custom exception intended for the case where a node is attempted to be added to a DirectoryNode already with three children
  */

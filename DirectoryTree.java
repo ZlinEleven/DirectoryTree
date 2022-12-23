@@ -1,5 +1,3 @@
-/** Zhenbin Lin, 114866923, Recitation 04 */
-
 /**
  * This class represents a DirectoryTree object which is a ternary tree modeling a directory file system
  */
